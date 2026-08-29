@@ -1,0 +1,52 @@
+// This folder contains options for both the bridge and networking adapter.
+// Environment files and .env files are available here. Set the value of any config option to process.env.<ENV name>
+
+import { Config } from "./launcher_types.js";
+
+export const config: Config = {
+  adapter: {
+    name: "Lulzdreamland",
+    bindHost: "0.0.0.0",
+    bindPort: Number.parseInt(process.env.PORT ?? "8080", 10),
+    maxConcurrentClients: 20,
+    // set this to false if you are unable to install sharp due to either the use of a platform that does not support native modules
+    // or if you are unable to install the required dependencies. this will cause the proxy to use jimp instead of sharp, which may
+    // degrade your proxy's performance.
+    useNatives: true,
+    skinServer: {
+      skinUrlWhitelist: undefined,
+      cache: {
+        useCache: true,
+        folderName: "skinCache",
+        skinCacheLifetime: 60 * 60 * 1000,
+        skinCachePruneInterval: 10 * 60 * 1000,
+      },
+    },
+    // Keep the WebSocket endpoint visible while the Aternos backend is asleep.
+    motd: {
+      l1: "Lulzdreamland",
+      l2: "Start Aternos, then join!",
+    },
+    ratelimits: {
+      lockout: 10,
+      limits: {
+        http: 100,
+        ws: 100,
+        motd: 100,
+        skins: 1000, // adjust as necessary
+        skinsIp: 10000,
+        connect: 100,
+      },
+    },
+    origins: {
+      allowOfflineDownloads: true,
+      originWhitelist: null,
+      originBlacklist: null,
+    },
+    server: {
+      host: process.env.ATERNOS_HOST ?? "Lulzdreamland.aternos.me",
+      port: Number.parseInt(process.env.ATERNOS_FALLBACK_PORT ?? "56181", 10),
+    },
+    tls: undefined,
+  },
+};

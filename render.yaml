@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: lulzdreamland-eagler-proxy
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.14.0
+      - key: ATERNOS_HOST
+        value: Lulzdreamland.aternos.me
+      - key: ATERNOS_FALLBACK_PORT
+        value: "56181"
