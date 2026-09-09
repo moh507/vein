@@ -9,9 +9,9 @@ export const config: Config = {
     bindHost: "0.0.0.0",
     bindPort: Number.parseInt(process.env.PORT ?? "8080", 10),
     maxConcurrentClients: 20,
-    // set this to false if you are unable to install sharp due to either the use of a platform that does not support native modules
-    // or if you are unable to install the required dependencies. this will cause the proxy to use jimp instead of sharp, which may
-    // degrade your proxy's performance.
+    // Set this to false if you are unable to install sharp due to either the use of a platform
+    // that does not support native modules or if you are unable to install the required dependencies.
+    // This will cause the proxy to use jimp instead of sharp, which may degrade performance.
     useNatives: true,
     skinServer: {
       skinUrlWhitelist: undefined,
@@ -26,7 +26,8 @@ export const config: Config = {
     motd: {
       l1: "§acome join our §olittle §4§nsecret§4 §a§lROOM",
       l2: "§kG§r §lJENNYS MOD§r §kl",
-      icon : ""
+      // Put the 64x64 PNG at the repository root as icon.png.
+      iconURL: "./icon.png",
     },
     ratelimits: {
       lockout: 10,
@@ -34,7 +35,7 @@ export const config: Config = {
         http: 100,
         ws: 100,
         motd: 100,
-        skins: 1000, // adjust as necessary
+        skins: 1000,
         skinsIp: 10000,
         connect: 100,
       },
