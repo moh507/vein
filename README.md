@@ -1,6 +1,6 @@
 # Aternos → Eaglercraft WebSocket Proxy
 
-A web-based EaglercraftX 1.8 WebSocket translator for Aternos Minecraft servers.
+A fixed EaglercraftX 1.8 WebSocket translator for the WindowsTw Aternos server.
 
 The proxy resolves the configured server's Minecraft SRV record when a player connects, so changing the Aternos backend port does not require changing the public WebSocket endpoint when the hostname remains the same.
 
@@ -20,7 +20,13 @@ Eaglercraft client
 Configured Aternos server
 ```
 
-Open the public HTTPS address in a browser, enter an Aternos address, and press **Translate**. The page returns a unique WebSocket address for that server. Each generated route forwards the Minecraft handshake and server packets independently, so multiple people can use different Aternos servers at the same time. Routes expire after one hour without use.
+Use the public WebSocket address directly in Eaglercraft:
+
+```text
+wss://THEGOONS.onrender.com/
+```
+
+Every player connects through the same public endpoint and gets an independent Minecraft connection to `windowsTw.aternos.me:49864`.
 
 The translator forwards the server's player list, MOTD text and icon, online/max player counts, version response, player UUID/session data, skins, chat, and gameplay packets. The Aternos server still needs to be reachable and configured for cracked/offline connections.
 
@@ -55,7 +61,7 @@ On Render's free plan, the service can sleep after inactivity. Open its HTTPS ad
 | `ATERNOS_FALLBACK_PORT` | `49864` | Port used if no SRV record is available |
 | `PORT` | `8080` | HTTP/WebSocket listening port provided by the host |
 
-The built-in defaults are still available for direct WebSocket clients using `/`, but browser users should use the translation page and the generated `/connect/...` address. Only Aternos hostnames (`*.aternos.me`, `*.aternos.host`, and `*.aternos.org`) are accepted.
+The backend is intentionally fixed to `windowsTw.aternos.me:49864`.
 
 ## Local test
 

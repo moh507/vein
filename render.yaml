@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: aternos-eagler-wss-proxy
+    name: THEGOONS
     runtime: node
     plan: free
     buildCommand: npm ci && npm run build
