@@ -5,7 +5,7 @@ import { Config } from "./launcher_types.js";
 
 export const config: Config = {
   adapter: {
-    name: "Lulzdreamland",
+    name: "Aternos-proxy",
     bindHost: "0.0.0.0",
     bindPort: Number.parseInt(process.env.PORT ?? "8080", 10),
     maxConcurrentClients: 20,
@@ -24,8 +24,9 @@ export const config: Config = {
     },
     // Keep the WebSocket endpoint visible while the Aternos backend is asleep.
     motd: {
-      l1: "Lulzdreamland",
-      l2: "Start Aternos, then join!",
+      l1: "§acome join our §olittle §4§nsecret§4 §a§lROOM",
+      l2: "§kG§r §lJENNYS MOD§r §kl",
+      icon : ""
     },
     ratelimits: {
       lockout: 10,
