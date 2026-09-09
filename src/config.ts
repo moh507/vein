@@ -10,7 +10,8 @@ export const config: Config = {
     bindHost: "0.0.0.0",
     bindPort: Number.parseInt(process.env.PORT ?? "8080", 10),
     maxConcurrentClients: 20,
-    useNatives: true,
+    // Use the pure-JS image path on Render. This avoids Sharp/libvips PNG decoding issues.
+    useNatives: false,
     skinServer: {
       skinUrlWhitelist: undefined,
       cache: {
