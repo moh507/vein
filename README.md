@@ -1,26 +1,33 @@
-# Lulzdreamland Eaglercraft Proxy
+# Aternos → Eaglercraft WebSocket Proxy
 
-A fixed-destination EaglercraftX 1.8 WebSocket proxy for:
+A simple fixed-destination EaglercraftX 1.8 WebSocket proxy that forwards players to a configured Aternos Minecraft server.
+
+The proxy resolves the configured server's Minecraft SRV record when a player connects, so changing the Aternos backend port does not require changing the public WebSocket endpoint when the hostname remains the same.
+
+This project is based on the MIT-licensed [WorldEditAxe/eaglerproxy](https://github.com/WorldEditAxe/eaglerproxy).
+
+## How it works
 
 ```text
-Lulzdreamland.aternos.me:56181
+Eaglercraft client
+       │
+       │ WSS
+       ▼
+  This proxy
+       │
+       │ Minecraft TCP
+       ▼
+Configured Aternos server
 ```
 
-It resolves the server's Minecraft SRV record every time a player connects, so
-there is no in-game `/join` command and no need to update a changing Aternos
-backend address. The public endpoint cannot be used to reach arbitrary servers.
-
-This project is based on the MIT-licensed
-[WorldEditAxe/eaglerproxy](https://github.com/WorldEditAxe/eaglerproxy).
+The public endpoint is restricted to the Aternos destination configured by `ATERNOS_HOST` and `ATERNOS_FALLBACK_PORT`.
 
 ## Before deploying
 
 On Aternos:
 
 1. Enable **Cracked** mode.
-2. Install **ViaVersion**, **ViaBackwards**, and **ViaRewind** on the Paper
-   server. All three are required to bridge an Eaglercraft 1.8 client to a
-   modern Paper server.
+2. Install **ViaVersion**, **ViaBackwards**, and **ViaRewind** on the Paper server. These are required to bridge an Eaglercraft 1.8 client to a modern Paper server.
 3. Restart the Aternos server after changing plugins.
 
 ## Deploy on Render
@@ -30,29 +37,21 @@ On Aternos:
 3. Apply the `render.yaml` blueprint.
 4. Wait for the deployment to finish.
 
-Render will provide an address similar to:
+Render will provide an HTTPS/WSS address for the proxy. Use its WebSocket form in Eaglercraft:
 
 ```text
-https://lulzdreamland-eagler-proxy.onrender.com
+wss://YOUR-SERVICE.onrender.com/
 ```
 
-Use the WebSocket version in Eaglercraft:
+On Render's free plan, the service can sleep after inactivity. Open its HTTPS address to wake it before connecting through Eaglercraft. The Aternos server must also be running.
 
-```text
-wss://lulzdreamland-eagler-proxy.onrender.com/
-```
-
-On Render's free plan, the service sleeps after 15 minutes without inbound
-traffic. To wake it, open its `https://` address, wait until it responds, and
-then connect through Eaglercraft. Aternos must also be running.
-
-## Environment variables
+## Configuration
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `ATERNOS_HOST` | `Lulzdreamland.aternos.me` | Stable Aternos hostname |
-| `ATERNOS_FALLBACK_PORT` | `56181` | Used only if no SRV record is available |
-| `PORT` | `8080` | Automatically provided by Render |
+| `ATERNOS_HOST` | `windowsTw.aternos.me` | Aternos hostname to forward to |
+| `ATERNOS_FALLBACK_PORT` | `49864` | Port used if no SRV record is available |
+| `PORT` | `8080` | HTTP/WebSocket listening port provided by the host |
 
 ## Local test
 
@@ -62,10 +61,10 @@ npm run build
 npm start
 ```
 
-Open `http://localhost:8080/health`. It should return a small JSON status.
+Then open `http://localhost:8080/health`. It should return a small JSON status.
 
 ## Security
 
-This build removes the general-purpose EagProxyAAS `/join` plugin. Every player
-is forwarded only to the configured Aternos hostname. Do not add Microsoft
-authentication tokens or passwords to this project.
+This build is a fixed-destination proxy. It does not expose the general-purpose EagProxyAAS `/join` functionality, so clients cannot use the public endpoint to connect to arbitrary servers.
+
+Do not add authentication tokens, passwords, or other secrets to the repository.
