@@ -2,6 +2,7 @@
 // Environment files and .env files are available here. Set the value of any config option to process.env.<ENV name>
 
 import { Config } from "./launcher_types.js";
+import { iconData } from "./icon.js";
 
 export const config: Config = {
   adapter: {
@@ -22,7 +23,7 @@ export const config: Config = {
     motd: {
       l1: "§acome join our §olittle §4§nsecret§4 §a§lROOM",
       l2: "§kG§r §lJENNYS MOD§r §kl",
-      iconURL: "./icon.png",
+      iconURL: iconData,
     },
     ratelimits: {
       lockout: 10,
