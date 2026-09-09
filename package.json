@@ -1,7 +1,7 @@
 {
-  "name": "lulzdreamland-eagler-proxy",
+  "name": "aternos-eagler-wss-proxy",
   "version": "1.0.0",
-  "description": "A fixed-destination Eaglercraft WebSocket proxy for Lulzdreamland on Aternos.",
+  "description": "A fixed-destination Aternos to Eaglercraft WebSocket proxy.",
   "main": "build/index.js",
   "scripts": {
     "build": "tsc",
