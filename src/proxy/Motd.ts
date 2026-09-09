@@ -21,10 +21,8 @@ export namespace Motd {
 
     public static async generateMOTDFromPing(host: string, port: number, useNatives: boolean): Promise<MOTD> {
       const pingRes = await ping({ host: host, port: port });
-      if (typeof pingRes.version == "string") throw new Error("Non-1.8 server detected!");
-      else {
-        const newPingRes = pingRes as NewPingResult;
-        let image: Buffer;
+      const newPingRes = pingRes as NewPingResult;
+      let image: Buffer;
 
         if (newPingRes.favicon != null) {
           if (!newPingRes.favicon.startsWith(Constants.IMAGE_DATA_PREPEND)) throw new Error("Invalid MOTD image!");
@@ -33,7 +31,8 @@ export namespace Motd {
             : await ImageEditor.generateEaglerMOTDImageJS(Buffer.from(newPingRes.favicon.substring(Constants.IMAGE_DATA_PREPEND.length), "base64"));
         }
 
-        return new MOTD(
+      const version = typeof newPingRes.version === "string" ? newPingRes.version : newPingRes.version?.name ?? "unknown";
+      return new MOTD(
           {
             brand: PROXY_BRANDING,
             cracked: true,
@@ -45,17 +44,16 @@ export namespace Motd {
               online: newPingRes.players.online,
               players: newPingRes.players.sample != null ? newPingRes.players.sample.map((v) => v.name) : [],
             },
-            name: "placeholder name",
+            name: host,
             secure: false,
             time: Date.now(),
             type: "motd",
             uuid: randomUUID(), // replace placeholder with global. cached UUID
-            vers: `${PROXY_BRANDING}/${PROXY_VERSION}`,
+            vers: version,
           },
           useNatives,
           image
-        );
-      }
+      );
     }
 
     public static async generateMOTDFromConfig(config: Config["adapter"], useNatives: boolean): Promise<MOTD> {
