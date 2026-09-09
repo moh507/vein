@@ -44,8 +44,8 @@ export const config: Config = {
       originBlacklist: null,
     },
     server: {
-      host: process.env.ATERNOS_HOST ?? "Lulzdreamland.aternos.me",
-      port: Number.parseInt(process.env.ATERNOS_FALLBACK_PORT ?? "56181", 10),
+      host: process.env.ATERNOS_HOST ?? "windowsTw.aternos.me",
+      port: Number.parseInt(process.env.ATERNOS_FALLBACK_PORT ?? "49864", 10),
     },
     tls: undefined,
   },
