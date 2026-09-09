@@ -8,7 +8,7 @@ export type BridgeOptions = {
     | "FORWARD"
     | "REALTIME"
     | {
-        iconURL?: string;
+        iconURL?: string | Buffer;
         l1: string;
         l2?: string;
       };
@@ -38,7 +38,7 @@ export type AdapterOptions = {
     | "FORWARD"
     | "REALTIME"
     | {
-        iconURL?: string;
+        iconURL?: string | Buffer;
         l1: string;
         l2?: string;
       };
