@@ -4,7 +4,7 @@ const f = Object.freeze;
 export const BRIDGE_VERSION: Readonly<number> = f(1);
 
 // adapter meta
-export const PROXY_BRANDING: Readonly<string> = f("EaglerProxy");
+export const PROXY_BRANDING: Readonly<string> = f("AternosWSS");
 export const PROXY_VERSION: Readonly<string> = f("1.1.0");
 
 export const NETWORK_VERSION: Readonly<number> = f(0x03);
