@@ -1,8 +1,7 @@
-// This folder contains options for both the bridge and networking adapter.
-// Environment files and .env files are available here. Set the value of any config option to process.env.<ENV name>
+// Configuration for the Aternos -> Eaglercraft WebSocket proxy.
+// Environment variables can override the Aternos destination.
 
 import { Config } from "./launcher_types.js";
-import { iconData } from "./icon.js";
 
 export const config: Config = {
   adapter: {
@@ -10,8 +9,8 @@ export const config: Config = {
     bindHost: "0.0.0.0",
     bindPort: Number.parseInt(process.env.PORT ?? "8080", 10),
     maxConcurrentClients: 20,
-    // Use the pure-JS image path on Render. This avoids Sharp/libvips PNG decoding issues.
-    useNatives: false,
+    // Native Sharp is enabled by default. Set ATERNOS_DISABLE_NATIVE_IMAGE=true to use Jimp.
+    useNatives: process.env.ATERNOS_DISABLE_NATIVE_IMAGE !== "true",
     skinServer: {
       skinUrlWhitelist: undefined,
       cache: {
@@ -24,7 +23,8 @@ export const config: Config = {
     motd: {
       l1: "§acome join our §olittle §4§nsecret§4 §a§lROOM",
       l2: "§kG§r §lJENNYS MOD§r §kl",
-      iconURL: iconData,
+      // Disable the custom icon until the image pipeline is verified.
+      iconURL: undefined,
     },
     ratelimits: {
       lockout: 10,
