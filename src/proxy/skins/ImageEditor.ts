@@ -245,6 +245,10 @@ export namespace ImageEditor {
   export function generateEaglerMOTDImageJS(file: string | Buffer): Promise<Buffer> {
     return new Promise<Buffer>(async (res, rej) => {
       Jimp.read(typeof file == "string" ? await fs.readFile(file) : file, async (err, image) => {
+        if (err || !image) {
+          rej(err ?? new Error("Unable to decode MOTD icon."));
+          return;
+        }
         image = image.resize(Constants.ICON_SQRT, Constants.ICON_SQRT, Jimp.RESIZE_NEAREST_NEIGHBOR);
         res(image.bitmap.data);
       });

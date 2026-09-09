@@ -9,8 +9,8 @@ export const config: Config = {
     bindHost: "0.0.0.0",
     bindPort: Number.parseInt(process.env.PORT ?? "8080", 10),
     maxConcurrentClients: 20,
-    // Native Sharp is enabled by default. Set ATERNOS_DISABLE_NATIVE_IMAGE=true to use Jimp.
-    useNatives: process.env.ATERNOS_DISABLE_NATIVE_IMAGE !== "true",
+    // Use the pure-JS image path on Render to avoid native PNG decoding issues.
+    useNatives: false,
     skinServer: {
       skinUrlWhitelist: undefined,
       cache: {
@@ -23,8 +23,7 @@ export const config: Config = {
     motd: {
       l1: "§acome join our §olittle §4§nsecret§4 §a§lROOM",
       l2: "§kG§r §lJENNYS MOD§r §kl",
-      // Disable the custom icon until the image pipeline is verified.
-      iconURL: undefined,
+      iconURL: "icon.png",
     },
     ratelimits: {
       lockout: 10,
@@ -43,8 +42,8 @@ export const config: Config = {
       originBlacklist: null,
     },
     server: {
-      host: process.env.ATERNOS_HOST ?? "windowsTw.aternos.me",
-      port: Number.parseInt(process.env.ATERNOS_FALLBACK_PORT ?? "49864", 10),
+      host: "windowsTw.aternos.me",
+      port: 49864,
     },
     tls: undefined,
   },

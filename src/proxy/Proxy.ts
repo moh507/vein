@@ -28,7 +28,6 @@ import { PluginManager } from "./pluginLoader/PluginManager.js";
 import ProxyRatelimitManager from "./ratelimit/ProxyRatelimitManager.js";
 import { SkinServer } from "./skins/SkinServer.js";
 import { resolveMinecraftServer } from "./ServerResolver.js";
-import { TranslationTarget, TranslationTargets } from "./TranslationTargets.js";
 
 let instanceCount = 0;
 const chalk = new Chalk({ level: 2 });
@@ -49,7 +48,6 @@ export class Proxy extends EventEmitter {
   public skinServer: SkinServer;
   public broadcastMotd?: Motd.MOTD;
   public ratelimit: ProxyRatelimitManager;
-  private readonly translationTargets = new TranslationTargets();
 
   private _logger: Logger;
   private initalHandlerLogger: Logger;
@@ -166,29 +164,9 @@ export class Proxy extends EventEmitter {
     this._logger.info(`Started WebSocket server and binded to ${this.config.bindHost} on port ${this.config.bindPort}.`);
   }
 
-  private async _handleNonWSRequest(req: http.IncomingMessage, res: http.ServerResponse, config: Config["adapter"]) {
+  private _handleNonWSRequest(req: http.IncomingMessage, res: http.ServerResponse, config: Config["adapter"]) {
     const inc = this.ratelimit.http.consume(req.socket.remoteAddress);
     if (inc.success) {
-      if (req.method === "GET" && (req.url === "/" || req.url === "/index.html")) {
-        res.setHeader("Content-Type", "text/html; charset=utf-8").writeHead(200).end(this._translationPage());
-        return;
-      }
-      if (req.method === "POST" && req.url === "/api/translate") {
-        try {
-          const body = JSON.parse(await this._readRequestBody(req));
-          const created = this.translationTargets.create(String(body.address ?? ""), config.server.port);
-          const protocol = req.headers["x-forwarded-proto"] === "https" || (req.socket as any).encrypted ? "wss" : "ws";
-          const host = req.headers.host ?? "localhost";
-          res.setHeader("Content-Type", "application/json").writeHead(200).end(JSON.stringify({
-            websocketUrl: `${protocol}://${host}/connect/${created.token}`,
-            host: created.target.host,
-            port: created.target.port,
-          }));
-        } catch (err) {
-          res.setHeader("Content-Type", "application/json").writeHead(400).end(JSON.stringify({ error: err.message ?? "Invalid request" }));
-        }
-        return;
-      }
       const ctx: Util.Handlable = { handled: false };
       this.emit("httpConnection", req, res, ctx);
       if (!ctx.handled && req.url === "/health") {
@@ -201,7 +179,7 @@ export class Proxy extends EventEmitter {
 
   readonly LOGIN_TIMEOUT = 30000;
 
-  private async _handleWSConnection(ws: WebSocket, req: http.IncomingMessage, target?: TranslationTarget) {
+  private async _handleWSConnection(ws: WebSocket, req: http.IncomingMessage) {
     const rl = this.ratelimit.ws.consume(req.socket.remoteAddress);
     if (!rl.success) {
       return ws.close();
@@ -229,16 +207,7 @@ export class Proxy extends EventEmitter {
         if (!this.ratelimit.motd.consume(req.socket.remoteAddress).success) {
           return ws.close();
         }
-        if (target) {
-          const motd = await Motd.MOTD.generateMOTDFromPing(target.host, target.port, this.config.useNatives).catch((err) => {
-            this._logger.warn(`Error polling ${target.host}:${target.port} for MOTD: ${err.stack ?? err}`);
-          });
-          if (motd) {
-            const bufferized = motd.toBuffer();
-            ws.send(bufferized[0]);
-            if (bufferized[1] != null) ws.send(bufferized[1]);
-          }
-        } else if (this.broadcastMotd) {
+        if (this.broadcastMotd) {
           const eventDetail = { motd: null };
           this.emit("fetchMotd", ws, req, eventDetail);
           eventDetail.motd = await eventDetail.motd;
@@ -345,10 +314,9 @@ export class Proxy extends EventEmitter {
         this._logger.info(`Handshake Success! Connecting player ${player.username} to server...`);
         handled = true;
 
-        const backend = target ?? this.config.server;
-        const destination = await resolveMinecraftServer(backend.host, backend.port);
+        const destination = await resolveMinecraftServer(this.config.server.host, this.config.server.port);
         this._logger.info(
-          `Resolved backend ${backend.host} to ${destination.host}:${destination.port}${destination.usedSrv ? " using SRV" : " using fallback port"}.`
+          `Resolved backend ${this.config.server.host} to ${destination.host}:${destination.port}${destination.usedSrv ? " using SRV" : " using fallback port"}.`
         );
         await player.connect({
           host: destination.host,
@@ -423,35 +391,11 @@ export class Proxy extends EventEmitter {
       return;
     }
     try {
-      const route = new URL(req.url ?? "/", "http://localhost").pathname.match(/^\/connect\/([A-Za-z0-9_-]+)\/?$/);
-      const target = route ? this.translationTargets.get(route[1]) : undefined;
-      if (route && !target) {
-        socket.destroy();
-        return;
-      }
-      await this.wsServer.handleUpgrade(req, socket, head, (ws) => this._handleWSConnection(ws, req, target));
+      await this.wsServer.handleUpgrade(req, socket, head, (ws) => this._handleWSConnection(ws, req));
     } catch (err) {
       this._logger.error(`Error was caught whilst trying to handle WebSocket connection request! Error: ${err.stack ?? err}`);
       socket.destroy();
     }
-  }
-
-  private _readRequestBody(req: http.IncomingMessage): Promise<string> {
-    return new Promise((resolve, reject) => {
-      let body = "";
-      req.setEncoding("utf8");
-      req.on("data", (chunk) => {
-        body += chunk;
-        if (body.length > 4096) reject(new Error("Request is too large."));
-      });
-      req.on("end", () => resolve(body));
-      req.on("error", reject);
-    });
-  }
-
-  private _translationPage(): string {
-    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Aternos to Eagler WSS</title><style>
-      :root{color-scheme:dark;--bg:#10161d;--panel:#19232d;--line:#344554;--text:#edf4f7;--muted:#9fb1ba;--accent:#70d6b3;--danger:#ff9d8e}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% 10%,#24434a 0,#10161d 38%),var(--bg);color:var(--text);font:16px Georgia,serif;display:grid;place-items:center;padding:24px}.panel{width:min(620px,100%);background:rgba(25,35,45,.94);border:1px solid var(--line);padding:clamp(28px,6vw,58px);box-shadow:0 24px 80px #0008}h1{font-size:clamp(2rem,7vw,4.5rem);line-height:.95;margin:0 0 18px;max-width:8ch}p{color:var(--muted);line-height:1.5;margin:0 0 28px}label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:8px}input,button{width:100%;border:1px solid var(--line);font:inherit;padding:14px 16px}input{background:#0e141a;color:var(--text);margin-bottom:12px}button{background:var(--accent);color:#10251f;border:0;font-weight:bold;cursor:pointer}button:disabled{opacity:.6;cursor:wait}.result{margin-top:22px;padding:16px;background:#0e141a;border-left:3px solid var(--accent);word-break:break-all}.result a{color:var(--accent)}.error{color:var(--danger);margin-top:14px;min-height:1.2em}small{color:var(--muted);display:block;margin-top:18px;line-height:1.4}</style></head><body><main class="panel"><h1>Translate your server.</h1><p>Enter the Aternos address to create a personal Eaglercraft WebSocket route. The route forwards the server handshake, player data, MOTD, skins, and version information for every connected player.</p><form id="form"><label for="address">Aternos address</label><input id="address" name="address" placeholder="your-server.aternos.me:25565" required autocomplete="off"><button id="submit" type="submit">Translate</button></form><div id="error" class="error" role="alert"></div><div id="result" class="result" hidden><strong>WebSocket address</strong><br><a id="url" href=""></a><small>Paste this WSS address into your Eaglercraft server list. It expires after one hour without use.</small></div></main><script>const form=document.querySelector('#form'),button=document.querySelector('#submit'),error=document.querySelector('#error'),result=document.querySelector('#result'),url=document.querySelector('#url');form.addEventListener('submit',async event=>{event.preventDefault();button.disabled=true;error.textContent='';result.hidden=true;try{const response=await fetch('/api/translate',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({address:document.querySelector('#address').value})});const data=await response.json();if(!response.ok)throw new Error(data.error||'Translation failed.');url.href=data.websocketUrl;url.textContent=data.websocketUrl;result.hidden=false}catch(exception){error.textContent=exception.message}finally{button.disabled=false}});</script></body></html>`;
   }
 
   public fetchUserByUUID(uuid: MineProtocol.UUID): Player | null {
