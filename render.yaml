@@ -10,6 +10,6 @@ services:
       - key: NODE_VERSION
         value: 22.14.0
       - key: ATERNOS_HOST
-        value: Lulzdreamland.aternos.me
+        value: windowsTw.aternos.me
       - key: ATERNOS_FALLBACK_PORT
-        value: "56181"
+        value: "49864"
