@@ -28,6 +28,7 @@ import { PluginManager } from "./pluginLoader/PluginManager.js";
 import ProxyRatelimitManager from "./ratelimit/ProxyRatelimitManager.js";
 import { SkinServer } from "./skins/SkinServer.js";
 import { resolveMinecraftServer } from "./ServerResolver.js";
+import AccountStore from "./accounts/AccountStore.js";
 
 let instanceCount = 0;
 const chalk = new Chalk({ level: 2 });
@@ -48,6 +49,7 @@ export class Proxy extends EventEmitter {
   public skinServer: SkinServer;
   public broadcastMotd?: Motd.MOTD;
   public ratelimit: ProxyRatelimitManager;
+  public accounts: AccountStore;
 
   private _logger: Logger;
   private initalHandlerLogger: Logger;
@@ -81,6 +83,7 @@ export class Proxy extends EventEmitter {
     };
     this.config = config;
     this.pluginManager = pluginManager;
+    this.accounts = new AccountStore(this.config.accounts.folder, this.config.accounts.exportFile);
     instanceCount++;
 
     process.on("uncaughtException", (err) => {
@@ -97,6 +100,7 @@ export class Proxy extends EventEmitter {
     global.PROXY = this;
     if (this.loaded) throw new Error("Can't initiate if proxy instance is already initialized or is being initialized!");
     this.loaded = true;
+    await this.accounts.load();
     this.packetRegistry = await loadPackets();
     this.skinServer = new SkinServer(
       this,
@@ -311,6 +315,7 @@ export class Proxy extends EventEmitter {
         player.initListeners();
         this._bindListenersToPlayer(player);
         player.state = Enums.ClientState.POST_HANDSHAKE;
+        await this._authenticatePlayer(player);
         this._logger.info(`Handshake Success! Connecting player ${player.username} to server...`);
         handled = true;
 
@@ -321,7 +326,7 @@ export class Proxy extends EventEmitter {
         await player.connect({
           host: destination.host,
           port: destination.port,
-          username: player.username,
+          username: player.backendUsername,
         });
         this._logger.info(`Player ${player.username} successfully connected to server.`);
         this.emit("playerConnect", player);
@@ -333,6 +338,49 @@ export class Proxy extends EventEmitter {
       if (player && player.uuid && this.players.has(`!phs.${player.uuid}`)) this.players.delete(`!phs.${player.uuid}`);
       if (player && player.uuid && this.players.has(player.username)) this.players.delete(player.username);
     }
+  }
+
+  private async _authenticatePlayer(player: Player) {
+    const sendMessage = (message: string) => {
+      player.ws.send(player.serverSerializer.createPacketBuffer({ name: "chat", params: { message: JSON.stringify({ text: message }), position: 0 } }));
+    };
+    sendMessage("Use /register <username> <password> or /login <username> <password>.");
+    return new Promise<void>((resolve, reject) => {
+      const cleanup = () => {
+        player.removeListener("vanillaPacket", onPacket);
+        player.ws.removeListener("close", onClose);
+      };
+      const onClose = () => {
+        cleanup();
+        reject(new Error("Connection closed before account authentication completed."));
+      };
+      const onPacket = async (packetData: any, direction: string, caller: Player) => {
+        if (caller !== player || direction !== "CLIENT" || packetData.name !== "chat") return;
+        const message = packetData.params?.message;
+        if (typeof message !== "string" || !message.startsWith("/")) return;
+        packetData.cancel = true;
+        const [command, username, password, extra] = message.trim().split(/\s+/);
+        if ((command !== "/register" && command !== "/login") || !username || !password || extra) {
+          sendMessage("Usage: /register <username> <password> or /login <username> <password>.");
+          return;
+        }
+        try {
+          const account = command === "/register" ? await this.accounts.register(username, password, player.username) : await this.accounts.authenticate(username, password);
+          if (!account) {
+            sendMessage("Invalid registered username or password.");
+            return;
+          }
+          player.backendUsername = account.username;
+          cleanup();
+          sendMessage(`Authenticated as ${account.username}. Connecting...`);
+          resolve();
+        } catch (err) {
+          sendMessage(String(err instanceof Error ? err.message : err));
+        }
+      };
+      player.on("vanillaPacket", onPacket);
+      player.ws.once("close", onClose);
+    });
   }
 
   private _bindListenersToPlayer(player: Player) {

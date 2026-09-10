@@ -18,6 +18,7 @@ const { createSerializer, createDeserializer } = pkg;
 export class Player extends EventEmitter {
   public ws: WebSocket & { httpRequest: IncomingMessage; _socket: Socket };
   public username?: string;
+  public backendUsername?: string;
   public skin?: EaglerSkins.EaglerSkin;
   public uuid?: string;
   public state?: Enums.ClientState = Enums.ClientState.PRE_HANDSHAKE;
@@ -96,14 +97,14 @@ export class Player extends EventEmitter {
       } else {
         try {
           const parsed = this.serverDeserializer.parsePacketBuffer(msg)?.data,
-            translated = this.translator.translatePacketClient(parsed.params, parsed),
+            translated = this.translator ? this.translator.translatePacketClient(parsed.params, parsed) : [parsed.name, parsed.params],
             packetData = {
               name: translated[0],
               params: translated[1],
               cancel: false,
             };
           this.emit("vanillaPacket", packetData, "CLIENT", this);
-          if (!packetData.cancel) {
+          if (!packetData.cancel && this.serverConnection) {
             (this as any)._sendPacketToServer(
               this.clientSerializer.createPacketBuffer({
                 name: packetData.name,

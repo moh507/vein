@@ -45,6 +45,10 @@ export const config: Config = {
       host: "windowsTw.aternos.me",
       port: 49864,
     },
+    accounts: {
+      folder: process.env.ACCOUNT_DATA_DIR ?? "data/accounts",
+      exportFile: process.env.ACCOUNT_EXPORT_FILE ?? "data/players.txt",
+    },
     tls: undefined,
   },
 };

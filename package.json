@@ -6,7 +6,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node build/index.js",
-    "test": "npm run build"
+    "test": "npm run build",
+    "reset-account": "npm run build && node build/tools/reset-account.js",
+    "migrate-playerdata": "npm run build && node build/tools/migrate-playerdata.js"
   },
   "author": "WorldEditAxe, q13x",
   "license": "MIT",

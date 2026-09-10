@@ -53,6 +53,29 @@ wss://YOUR-SERVICE.onrender.com/
 
 On Render's free plan, the service can sleep after inactivity. Open its HTTPS address to wake it before connecting through Eaglercraft. The Aternos server must also be running.
 
+## Accounts and old player data
+
+Players authenticate through the proxy before connecting to Aternos:
+
+```text
+/register RegisteredName a-password-at-least-8-chars
+/login RegisteredName a-password-at-least-8-chars
+```
+
+The registered name becomes the backend Minecraft name, so changing an Eaglercraft display name does not create a new Aternos player. Account records are stored in `data/accounts/accounts.json`; `data/players.txt` is an administrator recovery export containing salted hashes, never plaintext passwords. Reset a forgotten password from the proxy host with:
+
+```bash
+npm run reset-account -- RegisteredName new-password-at-least-8-chars
+```
+
+If an old world export contains `world/playerdata/<old-offline-UUID>.dat`, migrate it before the player joins for the first time:
+
+```bash
+npm run migrate-playerdata -- --world /path/to/world --old-name OldEaglerName --new-name RegisteredName
+```
+
+The command copies the complete player NBT to the registered offline UUID and backs up an existing destination file. This preserves inventory, position, XP, and ender chest. The checked-in `son` folder has no `playerdata` directory, so it cannot currently be migrated; the old host browser's Eagler world export is required.
+
 ## Configuration
 
 | Variable | Default | Purpose |

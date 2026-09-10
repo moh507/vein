@@ -57,6 +57,10 @@ export type AdapterOptions = {
     host: string;
     port: number;
   };
+  accounts: {
+    folder: string;
+    exportFile: string;
+  };
   tls?: {
     enabled: boolean;
     key: null;
