@@ -62,7 +62,6 @@ export type AdapterOptions = {
     exportFile: string;
     preserveLegacyPlayerData: boolean;
   };
-  adminStatusToken?: string;
   tls?: {
     enabled: boolean;
     key: null;

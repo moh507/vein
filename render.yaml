@@ -13,5 +13,3 @@ services:
         value: windowsTw.aternos.me
       - key: ATERNOS_FALLBACK_PORT
         value: "49864"
-      - key: ADMIN_STATUS_TOKEN
-        sync: false

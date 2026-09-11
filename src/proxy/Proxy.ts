@@ -177,16 +177,6 @@ export class Proxy extends EventEmitter {
         res.setHeader("Content-Type", "application/json").writeHead(200).end(JSON.stringify({ status: "ok", server: config.server.host }));
         return;
       }
-      if (!ctx.handled && req.url === "/admin/accounts") {
-        if (!config.adminStatusToken || req.headers.authorization !== `Bearer ${config.adminStatusToken}`) {
-          res.writeHead(404).end();
-          return;
-        }
-        res.setHeader("Content-Type", "application/json").writeHead(200).end(
-          JSON.stringify({ accounts: this.accounts.publicAccounts().map((account) => ({ ...account, online: this.players.has(account.username) })) })
-        );
-        return;
-      }
       if (!ctx.handled) res.setHeader("Content-Type", "text/html").writeHead(426).end(UPGRADE_REQUIRED_RESPONSE);
     }
   }
@@ -231,10 +221,8 @@ export class Proxy extends EventEmitter {
             if (bufferized[1] != null) ws.send(bufferized[1]);
           } else {
             if (this.config.motd == "REALTIME") {
-              const destination = await resolveMinecraftServer(this.config.server.host, this.config.server.port);
-              const motd = await Motd.MOTD.generateMOTDFromPing(destination.host, destination.port, this.config.useNatives).catch((err) => {
-                this._logger.warn(`Error polling ${destination.host}:${destination.port} for MOTD: ${err.stack ?? err}`);
-                return Motd.MOTD.generateOfflineMOTD(this.config.server.host, this.config.maxConcurrentClients, this.config.useNatives);
+              const motd = await Motd.MOTD.generateMOTDFromPing(this.config.server.host, this.config.server.port, this.config.useNatives).catch((err) => {
+                this._logger.warn(`Error polling ${this.config.server.host}:${this.config.server.port} for MOTD: ${err.stack ?? err}`);
               });
               if (motd) {
                 const bufferized = motd.toBuffer();
@@ -338,28 +326,22 @@ export class Proxy extends EventEmitter {
           port: destination.port,
           username: player.username,
         });
-        this._logger.info(`Backend login completed for ${player.username} at ${destination.host}:${destination.port}; waiting for account authentication.`);
         this._sendAuthenticationTitle(player);
-        this._authenticatePlayer(player)
-          .then(async () => {
-            player.authenticated = true;
-            if (player.backendUsername !== player.username) {
-              await player.switchServers({
-                host: destination.host,
-                port: destination.port,
-                username: player.backendUsername,
-              });
-            }
-            this._logger.info(`Account authenticated for ${player.username}; backend identity is ${player.backendUsername}.`);
-          })
-          .catch((err) => this._logger.warn(`Account authentication ended for ${player.username}: ${err.message ?? err}`));
+        await this._authenticatePlayer(player);
         player.authenticated = true;
-        this._logger.info(`Handshake Success! Connecting player ${player.username} immediately; account authentication is running in parallel.`);
+        if (player.backendUsername !== player.username) {
+          await player.switchServers({
+            host: destination.host,
+            port: destination.port,
+            username: player.backendUsername,
+          });
+        }
+        this._logger.info(`Handshake Success! Connecting player ${player.username} to server as ${player.backendUsername}...`);
         this._logger.info(`Player ${player.username} successfully connected to server.`);
         this.emit("playerConnect", player);
       }
     } catch (err) {
-      this.initalHandlerLogger.warn(`Error occurred whilst handling handshake for ${player?.username ?? "unknown player"}: ${err.stack ?? err}`);
+      this.initalHandlerLogger.warn(`Error occurred whilst handling handshake: ${err.stack ?? err}`);
       handled = true;
       ws.close();
       if (player && player.uuid && this.players.has(`!phs.${player.uuid}`)) this.players.delete(`!phs.${player.uuid}`);
@@ -471,10 +453,8 @@ export class Proxy extends EventEmitter {
   private _pollServer(host: string, port: number, interval?: number) {
     (async () => {
       while (true) {
-        const destination = await resolveMinecraftServer(host, port);
-        const motd = await Motd.MOTD.generateMOTDFromPing(destination.host, destination.port, this.config.useNatives).catch((err) => {
-          this._logger.warn(`Error polling ${destination.host}:${destination.port} for MOTD: ${err.stack ?? err}`);
-          this.broadcastMotd = Motd.MOTD.generateOfflineMOTD(host, this.config.maxConcurrentClients, this.config.useNatives);
+        const motd = await Motd.MOTD.generateMOTDFromPing(host, port, this.config.useNatives).catch((err) => {
+          this._logger.warn(`Error polling ${host}:${port} for MOTD: ${err.stack ?? err}`);
         });
         if (motd) this.broadcastMotd = motd;
         await new Promise((res) => setTimeout(res, interval ?? Proxy.POLL_INTERVAL));

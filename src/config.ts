@@ -21,9 +21,9 @@ export const config: Config = {
       },
     },
     motd: {
-      l1: "§eVerity §9Falsity §dLoveity §aDisgusity §4Madity §5Fearity §r(by AI)",
-      l2: "§ksss§r 🌧§lJEEENYYY'SSSSS MOOODD☁§r §kKKK",
-      iconURL: "motd-icon.png",
+      l1: "§acome join our §olittle §4§nsecret§4 §a§lROOM",
+      l2: "§kG§r §lJENNYS MOD§r §kl",
+      iconURL: "icon.png",
     },
     ratelimits: {
       lockout: 10,
@@ -50,7 +50,6 @@ export const config: Config = {
       exportFile: process.env.ACCOUNT_EXPORT_FILE ?? "data/players.txt",
       preserveLegacyPlayerData: process.env.PRESERVE_LEGACY_PLAYERDATA !== "false",
     },
-    adminStatusToken: process.env.ADMIN_STATUS_TOKEN,
     tls: undefined,
   },
 };

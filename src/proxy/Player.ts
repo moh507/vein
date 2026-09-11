@@ -105,7 +105,7 @@ export class Player extends EventEmitter {
               cancel: false,
             };
           this.emit("vanillaPacket", packetData, "CLIENT", this);
-          if (!packetData.cancel && this.serverConnection) {
+          if (!packetData.cancel && this.serverConnection && this.authenticated) {
             (this as any)._sendPacketToServer(
               this.clientSerializer.createPacketBuffer({
                 name: packetData.name,
