@@ -78,6 +78,8 @@ Use the exact browser profile and website that hosted the shared world, not the 
 
 If the world is not listed in that browser, inspect browser DevTools under Application/Storage > IndexedDB > `worlds`. Do not edit records manually unless the Eagler export menu is unavailable; the records are filesystem chunks, not necessarily a directly usable ZIP. If the browser profile or host world is gone, the `win` relay cannot reconstruct the missing inventory.
 
+The `win` launcher now includes a **Download Eagler browser backup** button. Use it from the original host browser profile before clearing site data. It downloads the `worlds` IndexedDB records and `_eaglercraftX` profile keys as a JSON diagnostic backup. Prefer the native Eagler world export, but keep this JSON as an additional copy. It may contain private world data and must not be committed to GitHub.
+
 ## Security/deployment reminder
 
 Do not commit `data/accounts/accounts.json`, `data/players.txt`, passwords, browser IndexedDB dumps, or world backups. Account data needs persistent storage on the deployment host; an ephemeral Render filesystem can lose it after a restart or redeploy.
