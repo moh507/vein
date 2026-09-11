@@ -344,7 +344,12 @@ export class Proxy extends EventEmitter {
     const sendMessage = (message: string) => {
       player.ws.send(player.serverSerializer.createPacketBuffer({ name: "chat", params: { message: JSON.stringify({ text: message }), position: 0 } }));
     };
-    sendMessage("Use /register <username> <password> or /login <username> <password>.");
+    sendMessage("Welcome to the server!");
+    sendMessage("You must register or log in before joining.");
+    sendMessage("Your account is linked to your player data, so remember your account name and password.");
+    sendMessage("First time here: /register <accountName> <password>");
+    sendMessage("Already registered: /login <accountName> <password>");
+    sendMessage("Your account name can be different from your Eaglercraft name. Do not create a second account if you forget your password.");
     return new Promise<void>((resolve, reject) => {
       const cleanup = () => {
         player.removeListener("vanillaPacket", onPacket);
