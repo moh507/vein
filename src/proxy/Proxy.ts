@@ -338,6 +338,7 @@ export class Proxy extends EventEmitter {
           port: destination.port,
           username: player.username,
         });
+        this._logger.info(`Backend login completed for ${player.username} at ${destination.host}:${destination.port}; waiting for account authentication.`);
         this._sendAuthenticationTitle(player);
         await this._authenticatePlayer(player);
         player.authenticated = true;
@@ -353,7 +354,7 @@ export class Proxy extends EventEmitter {
         this.emit("playerConnect", player);
       }
     } catch (err) {
-      this.initalHandlerLogger.warn(`Error occurred whilst handling handshake: ${err.stack ?? err}`);
+      this.initalHandlerLogger.warn(`Error occurred whilst handling handshake for ${player?.username ?? "unknown player"}: ${err.stack ?? err}`);
       handled = true;
       ws.close();
       if (player && player.uuid && this.players.has(`!phs.${player.uuid}`)) this.players.delete(`!phs.${player.uuid}`);

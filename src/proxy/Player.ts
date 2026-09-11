@@ -16,6 +16,16 @@ import { Socket } from "net";
 const { createSerializer, createDeserializer } = pkg;
 
 export class Player extends EventEmitter {
+  private static readonly PRE_AUTHENTICATION_CLIENT_PACKETS = new Set([
+    "chat",
+    "client_settings",
+    "client_status",
+    "custom_payload",
+    "keep_alive",
+    "plugin_message",
+    "resource_pack_receive",
+    "tab_complete",
+  ]);
   public ws: WebSocket & { httpRequest: IncomingMessage; _socket: Socket };
   public username?: string;
   public backendUsername?: string;
@@ -105,7 +115,7 @@ export class Player extends EventEmitter {
               cancel: false,
             };
           this.emit("vanillaPacket", packetData, "CLIENT", this);
-          if (!packetData.cancel && this.serverConnection && (this.authenticated || packetData.name == "keep_alive")) {
+          if (!packetData.cancel && this.serverConnection && (this.authenticated || Player.PRE_AUTHENTICATION_CLIENT_PACKETS.has(packetData.name))) {
             (this as any)._sendPacketToServer(
               this.clientSerializer.createPacketBuffer({
                 name: packetData.name,
