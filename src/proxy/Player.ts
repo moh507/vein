@@ -173,7 +173,7 @@ export class Player extends EventEmitter {
       Object.assign(
         {
           version: "1.8.9",
-          keepAlive: false,
+          keepAlive: true,
           hideErrors: false,
         },
         options
@@ -218,7 +218,7 @@ export class Player extends EventEmitter {
         Object.assign(
           {
             version: "1.8.9",
-            keepAlive: false,
+            keepAlive: true,
             hideErrors: false,
           },
           options
