@@ -340,16 +340,21 @@ export class Proxy extends EventEmitter {
         });
         this._logger.info(`Backend login completed for ${player.username} at ${destination.host}:${destination.port}; waiting for account authentication.`);
         this._sendAuthenticationTitle(player);
-        await this._authenticatePlayer(player);
+        this._authenticatePlayer(player)
+          .then(async () => {
+            player.authenticated = true;
+            if (player.backendUsername !== player.username) {
+              await player.switchServers({
+                host: destination.host,
+                port: destination.port,
+                username: player.backendUsername,
+              });
+            }
+            this._logger.info(`Account authenticated for ${player.username}; backend identity is ${player.backendUsername}.`);
+          })
+          .catch((err) => this._logger.warn(`Account authentication ended for ${player.username}: ${err.message ?? err}`));
         player.authenticated = true;
-        if (player.backendUsername !== player.username) {
-          await player.switchServers({
-            host: destination.host,
-            port: destination.port,
-            username: player.backendUsername,
-          });
-        }
-        this._logger.info(`Handshake Success! Connecting player ${player.username} to server as ${player.backendUsername}...`);
+        this._logger.info(`Handshake Success! Connecting player ${player.username} immediately; account authentication is running in parallel.`);
         this._logger.info(`Player ${player.username} successfully connected to server.`);
         this.emit("playerConnect", player);
       }
