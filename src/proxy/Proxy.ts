@@ -181,7 +181,7 @@ export class Proxy extends EventEmitter {
     }
   }
 
-  readonly LOGIN_TIMEOUT = 30000;
+  readonly LOGIN_TIMEOUT = 120000;
 
   private async _handleWSConnection(ws: WebSocket, req: http.IncomingMessage) {
     const rl = this.ratelimit.ws.consume(req.socket.remoteAddress);
@@ -291,6 +291,7 @@ export class Proxy extends EventEmitter {
         );
         player.write(new SCIdentifyPacket());
         const usernamePacket: CSUsernamePacket = (await player.read(Enums.PacketId.CSUsernamePacket)) as any;
+        this._logger.info(`Eagler username verified for ${player.username}.`);
         if (usernamePacket.username !== player.username) {
           player.disconnect(`${Enums.ChatColor.YELLOW}Failed to complete handshake. Your game version may be too old or too new.`);
           return;
@@ -308,6 +309,7 @@ export class Proxy extends EventEmitter {
         if (skin.skinType == Enums.SkinType.CUSTOM) obj.skin = skin.skin;
         else obj.builtInSkin = skin.skinId;
         player.skin = obj;
+        this._logger.info(`Eagler skin/ready handshake completed for ${player.username}.`);
 
         player.write(new SCReadyPacket());
         this.players.delete(`!phs.${player.uuid}`);

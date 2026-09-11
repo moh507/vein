@@ -81,7 +81,7 @@ export namespace Util {
         ws.removeListener("close", discon);
         ws.setMaxListeners(ws.getMaxListeners() - 2 < 0 ? 5 : ws.getMaxListeners() - 2);
         rej("Timed out");
-      }, 10000);
+      }, 30000);
     });
   }
 
