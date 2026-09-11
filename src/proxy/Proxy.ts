@@ -231,8 +231,10 @@ export class Proxy extends EventEmitter {
             if (bufferized[1] != null) ws.send(bufferized[1]);
           } else {
             if (this.config.motd == "REALTIME") {
-              const motd = await Motd.MOTD.generateMOTDFromPing(this.config.server.host, this.config.server.port, this.config.useNatives).catch((err) => {
-                this._logger.warn(`Error polling ${this.config.server.host}:${this.config.server.port} for MOTD: ${err.stack ?? err}`);
+              const destination = await resolveMinecraftServer(this.config.server.host, this.config.server.port);
+              const motd = await Motd.MOTD.generateMOTDFromPing(destination.host, destination.port, this.config.useNatives).catch((err) => {
+                this._logger.warn(`Error polling ${destination.host}:${destination.port} for MOTD: ${err.stack ?? err}`);
+                return Motd.MOTD.generateOfflineMOTD(this.config.server.host, this.config.maxConcurrentClients, this.config.useNatives);
               });
               if (motd) {
                 const bufferized = motd.toBuffer();
@@ -463,8 +465,9 @@ export class Proxy extends EventEmitter {
   private _pollServer(host: string, port: number, interval?: number) {
     (async () => {
       while (true) {
-        const motd = await Motd.MOTD.generateMOTDFromPing(host, port, this.config.useNatives).catch((err) => {
-          this._logger.warn(`Error polling ${host}:${port} for MOTD: ${err.stack ?? err}`);
+        const destination = await resolveMinecraftServer(host, port);
+        const motd = await Motd.MOTD.generateMOTDFromPing(destination.host, destination.port, this.config.useNatives).catch((err) => {
+          this._logger.warn(`Error polling ${destination.host}:${destination.port} for MOTD: ${err.stack ?? err}`);
           this.broadcastMotd = Motd.MOTD.generateOfflineMOTD(host, this.config.maxConcurrentClients, this.config.useNatives);
         });
         if (motd) this.broadcastMotd = motd;
