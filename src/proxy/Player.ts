@@ -327,7 +327,6 @@ export class Player extends EventEmitter {
             }
           }
         } else {
-          if (!this.authenticated) return;
           const translated = this.translator!.translatePacketServer(packet, meta),
             eventData = {
               name: translated[0],
