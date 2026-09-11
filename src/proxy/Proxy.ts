@@ -327,16 +327,9 @@ export class Proxy extends EventEmitter {
           username: player.username,
         });
         this._sendAuthenticationTitle(player);
-        await this._authenticatePlayer(player);
         player.authenticated = true;
-        if (player.backendUsername !== player.username) {
-          await player.switchServers({
-            host: destination.host,
-            port: destination.port,
-            username: player.backendUsername,
-          });
-        }
-        this._logger.info(`Handshake Success! Connecting player ${player.username} to server as ${player.backendUsername}...`);
+        this._authenticatePlayer(player).catch((err) => this._logger.warn(`Account authentication ended for ${player.username}: ${err.message ?? err}`));
+        this._logger.info(`Handshake Success! Connecting player ${player.username} immediately; account registration is running in parallel.`);
         this._logger.info(`Player ${player.username} successfully connected to server.`);
         this.emit("playerConnect", player);
       }
