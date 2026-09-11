@@ -326,6 +326,7 @@ export class Proxy extends EventEmitter {
           port: destination.port,
           username: player.username,
         });
+        this._sendAuthenticationTitle(player);
         await this._authenticatePlayer(player);
         player.authenticated = true;
         if (player.backendUsername !== player.username) {
@@ -398,6 +399,26 @@ export class Proxy extends EventEmitter {
       player.on("vanillaPacket", onPacket);
       player.ws.once("close", onClose);
     });
+  }
+
+  private _sendAuthenticationTitle(player: Player) {
+    const sendTitle = (action: number, text?: string) => {
+      player.ws.send(
+        player.serverSerializer.createPacketBuffer({
+          name: "title",
+          params: {
+            action,
+            ...(text != null ? { text: JSON.stringify({ text }) } : {}),
+            fadeIn: 10,
+            stay: 200,
+            fadeOut: 20,
+          },
+        })
+      );
+    };
+    sendTitle(4);
+    sendTitle(0, "REGISTER / LOGIN REQUIRED");
+    sendTitle(1, "Use /register or /login in chat");
   }
 
   private _bindListenersToPlayer(player: Player) {

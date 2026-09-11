@@ -86,7 +86,7 @@ npm run migrate-playerdata -- --world /path/to/eagler-world --old-name son_im_ve
 
 This converts the Eagler player file to gzipped vanilla NBT, rewrites `UUIDMost` and `UUIDLeast`, and writes `world/playerdata/<registered-offline-UUID>.dat`.
 
-Set `PRESERVE_LEGACY_PLAYERDATA=false` only after manually migrating the world to registered-name UUIDs. With the default setting, existing accounts with a legacy Eagler name always use that legacy backend identity; this avoids losing items even when the Aternos world still has the old `playerdata` file.
+`PRESERVE_LEGACY_PLAYERDATA` defaults to `false`, because the supplied `son-migrated-upload.zip` already contains playerdata under registered-name UUIDs. Set `PRESERVE_LEGACY_PLAYERDATA=true` only when using a world that still contains the original legacy playerdata UUIDs and has not been migrated.
 
 ## Configuration
 

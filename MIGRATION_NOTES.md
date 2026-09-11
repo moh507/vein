@@ -128,9 +128,9 @@ Before uploading, make sure the proxy account is registered with exactly `win`, 
 
 ## Automatic no-loss registration
 
-The proxy now defaults to `PRESERVE_LEGACY_PLAYERDATA=true`. When `shafi_the_bomber` registers as `shafi`, the account stores both names, but Aternos receives `shafi_the_bomber` as the backend username. Therefore Aternos loads the old offline UUID and old inventory automatically. The friend logs in later with `/login shafi password`; they do not need to type the old name again.
+The proxy supports `PRESERVE_LEGACY_PLAYERDATA=true` for worlds that still contain original legacy UUIDs. For the supplied `son-migrated-upload.zip`, leave it unset or set it to `false`: after `shafi_the_bomber` registers as `shafi`, Aternos receives `shafi` and loads the migrated registered-name UUID.
 
-This is intentionally different from physically renaming the Aternos playerdata file: the proxy cannot safely edit Aternos's remote filesystem at registration time. It is the automatic option that prevents data loss. Once a manual world migration to registered UUIDs is complete, set `PRESERVE_LEGACY_PLAYERDATA=false` and redeploy.
+The title overlay says `REGISTER / LOGIN REQUIRED` while the world is loading. Terrain must still be sent so the Eagler client can reach the chat screen; client gameplay packets remain blocked until authentication succeeds.
 
 ## Security/deployment reminder
 
