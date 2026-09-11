@@ -20,7 +20,11 @@ export const config: Config = {
         skinCachePruneInterval: 10 * 60 * 1000,
       },
     },
-    motd: "FORWARD",
+    motd: {
+      l1: "§eVerity §9Falsity §dLoveity §aDisgusity §4Madity §5Fearity §r(by AI)",
+      l2: "§ksss§r 🌧§lJEEENYYY'SSSSS MOOODD☁§r §kKKK",
+      iconURL: "motd-icon.png",
+    },
     ratelimits: {
       lockout: 10,
       limits: {
