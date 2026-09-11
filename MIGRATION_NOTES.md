@@ -80,6 +80,18 @@ If the world is not listed in that browser, inspect browser DevTools under Appli
 
 The `win` launcher now includes a **Download Eagler browser backup** button. Use it from the original host browser profile before clearing site data. It downloads the `worlds` IndexedDB records and `_eaglercraftX` profile keys as a JSON diagnostic backup. Prefer the native Eagler world export, but keep this JSON as an additional copy. It may contain private world data and must not be committed to GitHub.
 
+## Artifact inspection on 2026-09-11
+
+The downloaded files were inspected:
+
+- `EaglercraftX_1.8_u53.epk` begins with `EAGPKG$$` and identifies itself as `EaglercraftX 1.8 u53`; it is the client archive downloaded from the boot menu, not a saved world.
+- `eagler-browser-backup-2026-09-11T03-35-37-563Z.json` is valid, but its `worlds` IndexedDB database has no object stores and therefore no saved world records or player files.
+- The backup's `_eaglercraftX.p` profile data contains the skin username `son_im_VERY_sad`, not `win` player data.
+- The `_eaglercraftX.s` server list contains `son`; `_eaglercraftX.r` contains relay URLs. These are launcher settings only.
+- Searching the backup found no `playerdata`, `level.dat`, `region/`, `OfflinePlayer:`, or NBT records.
+
+Conclusion: these downloads cannot recover the inventory. They prove the launcher/profile origin was captured, but that origin had no local Eagler world database. The next recovery attempt must use the exact browser profile and origin where the shared world was hosted, then export the world from the in-game world menu. If the world was hosted by another friend, that friend's browser profile is the one that must be backed up.
+
 ## Security/deployment reminder
 
 Do not commit `data/accounts/accounts.json`, `data/players.txt`, passwords, browser IndexedDB dumps, or world backups. Account data needs persistent storage on the deployment host; an ephemeral Render filesystem can lose it after a restart or redeploy.
