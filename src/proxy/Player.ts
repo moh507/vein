@@ -19,6 +19,7 @@ export class Player extends EventEmitter {
   public ws: WebSocket & { httpRequest: IncomingMessage; _socket: Socket };
   public username?: string;
   public backendUsername?: string;
+  public authenticated: boolean = false;
   public skin?: EaglerSkins.EaglerSkin;
   public uuid?: string;
   public state?: Enums.ClientState = Enums.ClientState.PRE_HANDSHAKE;
@@ -104,7 +105,7 @@ export class Player extends EventEmitter {
               cancel: false,
             };
           this.emit("vanillaPacket", packetData, "CLIENT", this);
-          if (!packetData.cancel && this.serverConnection) {
+          if (!packetData.cancel && this.serverConnection && this.authenticated) {
             (this as any)._sendPacketToServer(
               this.clientSerializer.createPacketBuffer({
                 name: packetData.name,
@@ -326,6 +327,7 @@ export class Player extends EventEmitter {
             }
           }
         } else {
+          if (!this.authenticated) return;
           const translated = this.translator!.translatePacketServer(packet, meta),
             eventData = {
               name: translated[0],

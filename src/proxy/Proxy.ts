@@ -315,8 +315,6 @@ export class Proxy extends EventEmitter {
         player.initListeners();
         this._bindListenersToPlayer(player);
         player.state = Enums.ClientState.POST_HANDSHAKE;
-        await this._authenticatePlayer(player);
-        this._logger.info(`Handshake Success! Connecting player ${player.username} to server...`);
         handled = true;
 
         const destination = await resolveMinecraftServer(this.config.server.host, this.config.server.port);
@@ -326,8 +324,18 @@ export class Proxy extends EventEmitter {
         await player.connect({
           host: destination.host,
           port: destination.port,
-          username: player.backendUsername,
+          username: player.username,
         });
+        await this._authenticatePlayer(player);
+        player.authenticated = true;
+        if (player.backendUsername !== player.username) {
+          await player.switchServers({
+            host: destination.host,
+            port: destination.port,
+            username: player.backendUsername,
+          });
+        }
+        this._logger.info(`Handshake Success! Connecting player ${player.username} to server as ${player.backendUsername}...`);
         this._logger.info(`Player ${player.username} successfully connected to server.`);
         this.emit("playerConnect", player);
       }
