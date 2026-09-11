@@ -60,6 +60,7 @@ export type AdapterOptions = {
   accounts: {
     folder: string;
     exportFile: string;
+    preserveLegacyPlayerData: boolean;
   };
   tls?: {
     enabled: boolean;

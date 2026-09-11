@@ -370,9 +370,13 @@ export class Proxy extends EventEmitter {
             sendMessage("Invalid registered username or password.");
             return;
           }
-          player.backendUsername = account.username;
+          player.backendUsername = this.config.accounts.preserveLegacyPlayerData ? this.accounts.backendUsername(account) : account.username;
           cleanup();
-          sendMessage(`Authenticated as ${account.username}. Connecting...`);
+          sendMessage(
+            this.config.accounts.preserveLegacyPlayerData && account.legacyUsername
+              ? `Authenticated as ${account.username}. Existing player data is linked to ${account.legacyUsername}. Connecting...`
+              : `Authenticated as ${account.username}. Connecting...`
+          );
           resolve();
         } catch (err) {
           sendMessage(String(err instanceof Error ? err.message : err));

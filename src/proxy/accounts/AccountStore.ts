@@ -39,6 +39,9 @@ export default class AccountStore {
     const normalized = this.validateUsername(username);
     if (password.length < 8) throw new Error("Password must be at least 8 characters long.");
     if (this.accounts.has(this.key(normalized))) throw new Error("That registered username is already taken.");
+    if (legacyUsername && [...this.accounts.values()].some((account) => account.legacyUsername && this.key(account.legacyUsername) === this.key(legacyUsername))) {
+      throw new Error("That original Eagler identity is already linked to another account.");
+    }
     const salt = randomBytes(16).toString("hex");
     const account: Account = {
       username: normalized,
@@ -59,6 +62,10 @@ export default class AccountStore {
     const expected = Buffer.from(account.passwordHash, "hex");
     const actual = Buffer.from(this.hash(password, account.salt), "hex");
     return expected.length === actual.length && timingSafeEqual(expected, actual) ? account : null;
+  }
+
+  public backendUsername(account: Account) {
+    return account.legacyUsername ?? account.username;
   }
 
   public async resetPassword(username: string, password: string) {

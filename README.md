@@ -62,7 +62,7 @@ Players authenticate through the proxy before connecting to Aternos:
 /login RegisteredName a-password-at-least-8-chars
 ```
 
-The registered name becomes the backend Minecraft name, so changing an Eaglercraft display name does not create a new Aternos player. Account records are stored in `data/accounts/accounts.json`; `data/players.txt` is an administrator recovery export containing salted hashes, never plaintext passwords. Reset a forgotten password from the proxy host with:
+By default, an account keeps the original Eagler name as its backend Minecraft identity. For example, `shafi_the_bomber` can register as `shafi`; `/login shafi ...` authenticates the account, while Aternos still uses `shafi_the_bomber` and loads that old UUID's inventory. This is the automatic no-loss mode. Account records are stored in `data/accounts/accounts.json`; `data/players.txt` is an administrator recovery export containing salted hashes, never plaintext passwords. Reset a forgotten password from the proxy host with:
 
 ```bash
 npm run reset-account -- RegisteredName new-password-at-least-8-chars
@@ -83,6 +83,8 @@ npm run migrate-playerdata -- --world /path/to/eagler-world --old-name son_im_ve
 ```
 
 This converts the Eagler player file to gzipped vanilla NBT, rewrites `UUIDMost` and `UUIDLeast`, and writes `world/playerdata/<registered-offline-UUID>.dat`.
+
+Set `PRESERVE_LEGACY_PLAYERDATA=false` only after manually migrating the world to registered-name UUIDs. With the default setting, existing accounts with a legacy Eagler name always use that legacy backend identity; this avoids losing items even when the Aternos world still has the old `playerdata` file.
 
 ## Configuration
 

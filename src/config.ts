@@ -48,6 +48,7 @@ export const config: Config = {
     accounts: {
       folder: process.env.ACCOUNT_DATA_DIR ?? "data/accounts",
       exportFile: process.env.ACCOUNT_EXPORT_FILE ?? "data/players.txt",
+      preserveLegacyPlayerData: process.env.PRESERVE_LEGACY_PLAYERDATA !== "false",
     },
     tls: undefined,
   },

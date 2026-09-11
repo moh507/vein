@@ -126,6 +126,12 @@ That UUID is the offline UUID for `win`. The converted file was parsed successfu
 
 Before uploading, make sure the proxy account is registered with exactly `win`, or change `--new-name` and rerun against a fresh world copy. Upload `son-migrated` as the Aternos world ZIP; do not upload the EPK directly.
 
+## Automatic no-loss registration
+
+The proxy now defaults to `PRESERVE_LEGACY_PLAYERDATA=true`. When `shafi_the_bomber` registers as `shafi`, the account stores both names, but Aternos receives `shafi_the_bomber` as the backend username. Therefore Aternos loads the old offline UUID and old inventory automatically. The friend logs in later with `/login shafi password`; they do not need to type the old name again.
+
+This is intentionally different from physically renaming the Aternos playerdata file: the proxy cannot safely edit Aternos's remote filesystem at registration time. It is the automatic option that prevents data loss. Once a manual world migration to registered UUIDs is complete, set `PRESERVE_LEGACY_PLAYERDATA=false` and redeploy.
+
 ## Security/deployment reminder
 
 Do not commit `data/accounts/accounts.json`, `data/players.txt`, passwords, browser IndexedDB dumps, or world backups. Account data needs persistent storage on the deployment host; an ephemeral Render filesystem can lose it after a restart or redeploy.
