@@ -326,10 +326,9 @@ export class Proxy extends EventEmitter {
           port: destination.port,
           username: player.username,
         });
-        this._sendAuthenticationTitle(player);
         player.authenticated = true;
-        this._authenticatePlayer(player).catch((err) => this._logger.warn(`Account authentication ended for ${player.username}: ${err.message ?? err}`));
-        this._logger.info(`Handshake Success! Connecting player ${player.username} immediately; account registration is running in parallel.`);
+        player.backendUsername = player.username;
+        this._logger.info(`Handshake Success! Connecting player ${player.username} without account authentication.`);
         this._logger.info(`Player ${player.username} successfully connected to server.`);
         this.emit("playerConnect", player);
       }
