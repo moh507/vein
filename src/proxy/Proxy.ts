@@ -177,6 +177,16 @@ export class Proxy extends EventEmitter {
         res.setHeader("Content-Type", "application/json").writeHead(200).end(JSON.stringify({ status: "ok", server: config.server.host }));
         return;
       }
+      if (!ctx.handled && req.url === "/admin/accounts") {
+        if (!config.adminStatusToken || req.headers.authorization !== `Bearer ${config.adminStatusToken}`) {
+          res.writeHead(404).end();
+          return;
+        }
+        res.setHeader("Content-Type", "application/json").writeHead(200).end(
+          JSON.stringify({ accounts: this.accounts.publicAccounts().map((account) => ({ ...account, online: this.players.has(account.username) })) })
+        );
+        return;
+      }
       if (!ctx.handled) res.setHeader("Content-Type", "text/html").writeHead(426).end(UPGRADE_REQUIRED_RESPONSE);
     }
   }
@@ -455,6 +465,7 @@ export class Proxy extends EventEmitter {
       while (true) {
         const motd = await Motd.MOTD.generateMOTDFromPing(host, port, this.config.useNatives).catch((err) => {
           this._logger.warn(`Error polling ${host}:${port} for MOTD: ${err.stack ?? err}`);
+          this.broadcastMotd = Motd.MOTD.generateOfflineMOTD(host, this.config.maxConcurrentClients, this.config.useNatives);
         });
         if (motd) this.broadcastMotd = motd;
         await new Promise((res) => setTimeout(res, interval ?? Proxy.POLL_INTERVAL));

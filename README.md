@@ -57,6 +57,14 @@ On Render's free plan, the service can sleep after inactivity. Open its HTTPS ad
 
 Friends can use the simple joining guide in [JOINING.md](JOINING.md).
 
+The account export is written relative to the running proxy as `data/players.txt` and `data/accounts/accounts.json`. On Render, the free filesystem is temporary, so these files can appear empty after a restart or redeploy unless you attach persistent storage. To view safe account metadata without passwords, set the Render secret `ADMIN_STATUS_TOKEN`, then request:
+
+```bash
+curl -H "Authorization: Bearer YOUR_ADMIN_STATUS_TOKEN" https://YOUR-SERVICE.onrender.com/admin/accounts
+```
+
+The response includes registered names, original Eagler names, creation times, and online status. It never returns password hashes.
+
 Players authenticate through the proxy before connecting to Aternos:
 
 ```text

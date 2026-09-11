@@ -10,6 +10,8 @@ export type Account = {
   createdAt: string;
 };
 
+export type PublicAccount = Pick<Account, "username" | "legacyUsername" | "createdAt">;
+
 export default class AccountStore {
   private readonly filePath: string;
   private readonly exportPath: string;
@@ -66,6 +68,10 @@ export default class AccountStore {
 
   public backendUsername(account: Account) {
     return account.legacyUsername ?? account.username;
+  }
+
+  public publicAccounts(): PublicAccount[] {
+    return [...this.accounts.values()].map(({ username, legacyUsername, createdAt }) => ({ username, legacyUsername, createdAt }));
   }
 
   public async resetPassword(username: string, password: string) {

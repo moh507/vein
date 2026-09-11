@@ -20,11 +20,7 @@ export const config: Config = {
         skinCachePruneInterval: 10 * 60 * 1000,
       },
     },
-    motd: {
-      l1: "§acome join our §olittle §4§nsecret§4 §a§lROOM",
-      l2: "§kG§r §lJENNYS MOD§r §kl",
-      iconURL: "icon.png",
-    },
+    motd: "FORWARD",
     ratelimits: {
       lockout: 10,
       limits: {
@@ -50,6 +46,7 @@ export const config: Config = {
       exportFile: process.env.ACCOUNT_EXPORT_FILE ?? "data/players.txt",
       preserveLegacyPlayerData: process.env.PRESERVE_LEGACY_PLAYERDATA !== "false",
     },
+    adminStatusToken: process.env.ADMIN_STATUS_TOKEN,
     tls: undefined,
   },
 };

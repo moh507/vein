@@ -86,6 +86,23 @@ export namespace Motd {
       } else throw new Error("MOTD is set to be forwarded in the config!");
     }
 
+    public static generateOfflineMOTD(host: string, max: number, useNatives: boolean): MOTD {
+      return new MOTD(
+        {
+          brand: PROXY_BRANDING,
+          cracked: true,
+          data: { cache: true, icon: false, max, motd: ["§cAternos server is offline", `§7Start ${host} on Aternos`], online: 0, players: [] },
+          name: host,
+          secure: false,
+          time: Date.now(),
+          type: "motd",
+          uuid: randomUUID(),
+          vers: `${PROXY_BRANDING}/${PROXY_VERSION}`,
+        },
+        useNatives
+      );
+    }
+
     public toBuffer(): [string, Buffer] {
       return [JSON.stringify(this.jsonMotd), this.image];
     }
