@@ -64,7 +64,7 @@ Players authenticate through the proxy before connecting to Aternos:
 /login RegisteredName a-password-at-least-8-chars
 ```
 
-By default, an account keeps the original Eagler name as its backend Minecraft identity. For example, `shafi_the_bomber` can register as `shafi`; `/login shafi ...` authenticates the account, while Aternos still uses `shafi_the_bomber` and loads that old UUID's inventory. This is the automatic no-loss mode. Account records are stored in `data/accounts/accounts.json`; `data/players.txt` is an administrator recovery export containing salted hashes, never plaintext passwords. Reset a forgotten password from the proxy host with:
+By default, an account keeps the original Eagler name as its backend Minecraft identity. For example, `shafi_the_bomber` can register as `shafi`; `/login shafi ...` authenticates the account, while Aternos still uses `shafi_the_bomber` and loads that old UUID's inventory. This is the automatic no-loss mode, so nobody has to register as `win` or any other temporary migration name. Account records are stored in `data/accounts/accounts.json`; `data/players.txt` is an administrator recovery export containing salted hashes, never plaintext passwords. Reset a forgotten password from the proxy host with:
 
 ```bash
 npm run reset-account -- RegisteredName new-password-at-least-8-chars
@@ -86,7 +86,7 @@ npm run migrate-playerdata -- --world /path/to/eagler-world --old-name son_im_ve
 
 This converts the Eagler player file to gzipped vanilla NBT, rewrites `UUIDMost` and `UUIDLeast`, and writes `world/playerdata/<registered-offline-UUID>.dat`.
 
-`PRESERVE_LEGACY_PLAYERDATA` defaults to `false`, because the supplied `son-migrated-upload.zip` already contains playerdata under registered-name UUIDs. Set `PRESERVE_LEGACY_PLAYERDATA=true` only when using a world that still contains the original legacy playerdata UUIDs and has not been migrated.
+`PRESERVE_LEGACY_PLAYERDATA` defaults to `true`. Keep it enabled when the world contains the original Eagler playerdata UUIDs. Set it to `false` only after deliberately converting every player file to registered-name UUIDs.
 
 ## Configuration
 
