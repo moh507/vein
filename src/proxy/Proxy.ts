@@ -299,7 +299,6 @@ export class Proxy extends EventEmitter {
         syncUuid.username = player.username;
         syncUuid.uuid = player.uuid;
         player.write(syncUuid);
-        player.write(new SCReadyPacket());
 
         const prom = await Promise.all([player.read(Enums.PacketId.CSReadyPacket), (await player.read(Enums.PacketId.CSSetSkinPacket)) as CSSetSkinPacket]),
           skin = prom[1],
@@ -310,6 +309,7 @@ export class Proxy extends EventEmitter {
         else obj.builtInSkin = skin.skinId;
         player.skin = obj;
 
+        player.write(new SCReadyPacket());
         this.players.delete(`!phs.${player.uuid}`);
         this.players.set(player.username, player);
         player.initListeners();
