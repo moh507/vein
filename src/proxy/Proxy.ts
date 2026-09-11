@@ -113,6 +113,7 @@ export class Proxy extends EventEmitter {
     );
     global.PACKET_REGISTRY = this.packetRegistry;
     if (this.config.motd == "FORWARD") {
+      this.broadcastMotd = Motd.MOTD.generateOfflineMOTD(this.config.server.host, this.config.maxConcurrentClients, this.config.useNatives);
       this._pollServer(this.config.server.host, this.config.server.port);
     } else {
       const broadcastMOTD = await Motd.MOTD.generateMOTDFromConfig(this.config, this.config.useNatives);
