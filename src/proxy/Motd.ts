@@ -20,7 +20,7 @@ export namespace Motd {
     }
 
     public static async generateMOTDFromPing(host: string, port: number, useNatives: boolean): Promise<MOTD> {
-      const pingRes = await ping({ host: host, port: port, closeTimeout: 8000, noPongTimeout: 3000 });
+      const pingRes = await ping({ host: host, port: port });
       const newPingRes = pingRes as NewPingResult;
       let image: Buffer;
 
@@ -37,7 +37,7 @@ export namespace Motd {
             brand: PROXY_BRANDING,
             cracked: true,
             data: {
-              cache: false,
+              cache: true,
               icon: newPingRes.favicon != null ? true : false,
               max: newPingRes.players.max,
               motd: [typeof newPingRes.description == "string" ? newPingRes.description : Chat.chatToPlainString(newPingRes.description), ""],
@@ -91,7 +91,7 @@ export namespace Motd {
         {
           brand: PROXY_BRANDING,
           cracked: true,
-          data: { cache: false, icon: false, max, motd: ["§cAternos server is offline", `§7Start ${host} on Aternos`], online: 0, players: [] },
+          data: { cache: true, icon: false, max, motd: ["§cAternos server is offline", `§7Start ${host} on Aternos`], online: 0, players: [] },
           name: host,
           secure: false,
           time: Date.now(),
@@ -112,7 +112,7 @@ export namespace Motd {
     brand: string;
     cracked: true;
     data: {
-      cache: boolean;
+      cache: true;
       icon: boolean;
       max: number;
       motd: [string, string];
