@@ -55,6 +55,8 @@ On Render's free plan, the service can sleep after inactivity. Open its HTTPS ad
 
 ## Accounts and old player data
 
+Friends can use the simple joining guide in [JOINING.md](JOINING.md).
+
 Players authenticate through the proxy before connecting to Aternos:
 
 ```text
