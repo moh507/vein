@@ -76,6 +76,14 @@ npm run migrate-playerdata -- --world /path/to/world --old-name OldEaglerName --
 
 The command copies the complete player NBT to the registered offline UUID and backs up an existing destination file. This preserves inventory, position, XP, and ender chest. The checked-in `son` folder has no `playerdata` directory, so it cannot currently be migrated; the old host browser's Eagler world export is required.
 
+For an Eagler EPK extraction, where player files are stored as `world/player/<lowercase-name>.dat`, add `--eagler-world`:
+
+```bash
+npm run migrate-playerdata -- --world /path/to/eagler-world --old-name son_im_very_sad --new-name RegisteredName --eagler-world
+```
+
+This converts the Eagler player file to gzipped vanilla NBT, rewrites `UUIDMost` and `UUIDLeast`, and writes `world/playerdata/<registered-offline-UUID>.dat`.
+
 ## Configuration
 
 | Variable | Default | Purpose |

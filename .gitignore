@@ -1,0 +1,10 @@
+node_modules/
+build/
+data/
+son/
+son-migrated/
+finally/
+*.epk
+*-upload.zip
+eagler-browser-backup-*.json
+image.png

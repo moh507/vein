@@ -92,6 +92,40 @@ The downloaded files were inspected:
 
 Conclusion: these downloads cannot recover the inventory. They prove the launcher/profile origin was captured, but that origin had no local Eagler world database. The next recovery attempt must use the exact browser profile and origin where the shared world was hosted, then export the world from the in-game world menu. If the world was hosted by another friend, that friend's browser profile is the one that must be backed up.
 
+## Recovered EPK migration on 2026-09-11
+
+The newly supplied EPK extraction is the actual Eagler world. Its layout is:
+
+```text
+finally/level.dat
+finally/level0/
+finally/level-1/
+finally/player/<lowercase-eagler-name>.dat
+finally/stats/<EaglerName>.json
+```
+
+The recovered `finally/player/son_im_very_sad.dat` contains 30 inventory entries, XP level 3, position `[138.7, 65, 67.7]`, and UUID fields. Eagler stores these files in `player/`, not vanilla `playerdata/`.
+
+The migration utility now supports this format:
+
+```bash
+npm run migrate-playerdata -- \
+  --world /path/to/eagler-world \
+  --old-name son_im_very_sad \
+  --new-name win \
+  --eagler-world
+```
+
+This was run successfully into a separate copy named `son-migrated/`. It created:
+
+```text
+son-migrated/playerdata/661d7291-0125-3801-b1b2-56490e2cbf91.dat
+```
+
+That UUID is the offline UUID for `win`. The converted file was parsed successfully after writing and retained all 30 inventory entries, XP, position, and the rewritten target UUID. The original `son/` and `finally/` directories were not modified.
+
+Before uploading, make sure the proxy account is registered with exactly `win`, or change `--new-name` and rerun against a fresh world copy. Upload `son-migrated` as the Aternos world ZIP; do not upload the EPK directly.
+
 ## Security/deployment reminder
 
 Do not commit `data/accounts/accounts.json`, `data/players.txt`, passwords, browser IndexedDB dumps, or world backups. Account data needs persistent storage on the deployment host; an ephemeral Render filesystem can lose it after a restart or redeploy.

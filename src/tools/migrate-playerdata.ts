@@ -1,5 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
+import zlib from "zlib";
+import nbt from "prismarine-nbt";
 import { Util } from "../proxy/Util.js";
 
 function argument(name: string) {
@@ -10,16 +12,18 @@ function argument(name: string) {
 const world = argument("--world");
 const oldName = argument("--old-name");
 const newName = argument("--new-name");
+const eaglerWorld = process.argv.includes("--eagler-world");
 
 if (!world || !oldName || !newName) {
-  console.error("Usage: node build/tools/migrate-playerdata.js --world <world> --old-name <oldEaglerName> --new-name <registeredName>");
+  console.error("Usage: node build/tools/migrate-playerdata.js --world <world> --old-name <oldName> --new-name <registeredName> [--eagler-world]");
   process.exit(1);
 }
 
-const playerdata = path.join(path.resolve(world), "playerdata");
+const worldPath = path.resolve(world);
+const playerdata = path.join(worldPath, "playerdata");
 const oldUuid = Util.generateUUIDFromPlayer(oldName);
 const newUuid = Util.generateUUIDFromPlayer(newName);
-const source = path.join(playerdata, `${oldUuid}.dat`);
+const source = eaglerWorld ? path.join(worldPath, "player", `${oldName.toLowerCase()}.dat`) : path.join(playerdata, `${oldUuid}.dat`);
 const destination = path.join(playerdata, `${newUuid}.dat`);
 
 try {
@@ -37,6 +41,19 @@ try {
 } catch {
   // No current destination file needs a backup.
 }
-await fs.copyFile(source, destination);
+if (eaglerWorld) {
+  const parsed = await nbt.parse(await fs.readFile(source));
+  const root = parsed.parsed as any;
+  const tags = root.value as Record<string, any>;
+  const uuidBytes = Buffer.from(Util.uuidStringToBuffer(newUuid));
+  let most = uuidBytes.readBigInt64BE(0);
+  let least = uuidBytes.readBigInt64BE(8);
+  tags.UUIDMost = { type: "long", value: most };
+  tags.UUIDLeast = { type: "long", value: least };
+  const encoded = nbt.writeUncompressed(root);
+  await fs.writeFile(destination, zlib.gzipSync(encoded));
+} else {
+  await fs.copyFile(source, destination);
+}
 console.log(`Migrated ${oldName} (${oldUuid}) to ${newName} (${newUuid}).`);
 console.log("This preserves the complete player NBT, including inventory, position, XP, and ender chest.");
